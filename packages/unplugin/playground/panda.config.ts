@@ -1,54 +1,63 @@
 import { defineConfig } from '@pandacss/dev'
 
-export default defineConfig({
-  // Whether to use css reset
-  preflight: true,
+import { hook as codegenPrepare } from './config/hooks/codegen-prepare'
+import { hook as contextCreated } from './config/hooks/context-created'
+import { hook as tokensCreated } from './config/hooks/tokens-created'
 
+export default defineConfig({
   // Where to look for your css declarations
   include: ['./src/**/*.{js,jsx,ts,tsx}', './{App,main,minimal}*.{js,jsx,ts,tsx}'],
 
-  // Files to exclude
-  exclude: [],
-
-  // Useful for theme customization
+  // Miro
+  // hash: true,
+  // clean: true,
+  lightningcss: true,
+  // polyfill: true,
+  shorthands: false,
+  jsxFramework: 'react',
+  jsxStyleProps: 'minimal',
+  separator: '-',
+  outdir: 'styled-system',
+  outExtension: 'js',
+  preflight: false,
+  presets: ['@pandacss/preset-base'],
+  conditions: {
+    light: '[data-color-mode=light] &',
+    dark: '[data-color-mode=dark] &',
+    defaultTheme: '[data-theme=default] &',
+  },
   theme: {
-    extend: {
-      recipes: {
-        button: {
-          className: 'button',
-          description: 'The styles for the Button component',
-          base: {
-            display: 'flex',
-            cursor: 'pointer',
-            fontWeight: 'bold',
-          },
-          variants: {
-            visual: {
-              funky: { bg: 'blue.200', color: 'slate.800' },
-              edgy: { border: '1px solid {colors.red.500}' },
-            },
-            size: {
-              sm: { padding: '4', fontSize: '12px' },
-              lg: { padding: '8', fontSize: '40px' },
-            },
-            shape: {
-              square: { borderRadius: '0' },
-              circle: { borderRadius: 'full' },
-            },
-          },
-          defaultVariants: {
-            visual: 'funky',
-            size: 'sm',
-            shape: 'circle',
+    tokens: {
+      colors: {
+        red: {
+          light: { value: '#ff0000' },
+          dark: { value: '#990000' },
+        },
+        blue: {
+          light: { value: '#0000ff' },
+          dark: { value: '#000099' },
+        },
+        yellow: {
+          light: { value: '#ffff00' },
+          dark: { value: '#999900' },
+        },
+      },
+    },
+    semanticTokens: {
+      colors: {
+        danger: {
+          value: {
+            base: '{colors.red.light}',
+            _light: { value: '{colors.red.light}' },
+            _dark: { value: '{colors.red.dark}' },
           },
         },
       },
     },
   },
-
-  // The output directory for your css system
-  outdir: 'styled-system',
-
-  // The JSX framework to use
-  jsxFramework: 'react',
+  hooks: {
+    'codegen:prepare': codegenPrepare,
+    'context:created': contextCreated,
+    'tokens:created': tokensCreated,
+  },
 })

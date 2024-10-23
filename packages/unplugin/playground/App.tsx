@@ -1,59 +1,191 @@
-import { css, cva } from './styled-system/css'
-import { center } from './styled-system/patterns'
-import { button } from './styled-system/recipes'
-import { Stack, styled } from './styled-system/jsx'
-// import 'virtual:panda.css'
-import './panda.css'
+import { useRef, forwardRef } from 'react'
+import type { ReactNode } from 'react'
 
-const overrides = css.raw({
-  bg: 'purple.500',
-})
+import { styled } from '@mirohq/design-system-pandacss/styled-system/jsx'
+import { cva, css } from '@mirohq/design-system-pandacss/styled-system/css'
 
-const atomicRecipe = cva({
-  base: {
-    display: 'flex',
-  },
+const cssInfoStatus = css({
   variants: {
-    visual: {
-      solid: { bg: 'red.200', color: 'white' },
-      outline: { borderWidth: '1px', borderColor: 'red.200' },
-    },
-    size: {
-      sm: { padding: '4', fontSize: '12px' },
-      lg: { padding: '8', fontSize: '24px' },
+    status: {
+      info: {
+        background: '$blue-500',
+      },
     },
   },
 })
 
-console.log(atomicRecipe({ visual: 'outline' }))
+const cssGhost = css({
+  background: '$black',
+  variants: {
+    ghost: {
+      true: {
+        color: '$white',
+      },
+    },
+  },
+})
 
-export const App = () => {
+export const cssStyles = css(
+  [
+    {
+      variants: {
+        status: {
+          ok: {
+            background: '$green-500',
+          },
+        },
+      },
+    },
+  ],
+  {
+    variants: {
+      status: {
+        fail: {
+          background: '$red-500',
+        },
+      },
+    },
+  },
+  cssInfoStatus,
+  cssGhost,
+)
+
+const Box = styled('div', {
+  background: '$blue-500',
+  color: '$white',
+  variants: {
+    ghost: {
+      true: {
+        background: '$yellow-500',
+      },
+    },
+  },
+  allowedCssProps: ['background', 'color', 'margin'],
+})
+
+const ExtendedBox = styled(Box, {
+  background: '$blue-400',
+  '&:hover': {
+    background: '$black',
+  },
+  allowedCssProps: ['background'],
+})
+
+ExtendedBox.displayName = 'ExtendedBox'
+
+const ExtendedBox2 = styled(ExtendedBox, {
+  background: '$blue-300',
+})
+
+ExtendedBox2.displayName = 'ExtendedBox2'
+
+const ForwardRef = forwardRef<HTMLDivElement, { propInForwardRef?: boolean; children: ReactNode }>(
+  ({ propInForwardRef, ...props }, ref) => <div data-prop={propInForwardRef} {...props} ref={ref} />,
+)
+
+const Variants = styled(ForwardRef, {
+  color: '$white',
+  variants: {
+    ghost: {
+      true: {
+        background: '$red-400',
+      },
+      false: {
+        background: '$red-500',
+      },
+    },
+  },
+  defaultVariants: {
+    ghost: false,
+  },
+})
+
+const BoxCVA = styled(
+  'div',
+  cva({
+    base: {
+      background: '$green-500',
+      color: '$white',
+    },
+    variants: {
+      fail: {
+        true: {
+          background: '$green-400',
+        },
+      },
+    },
+  }),
+)
+
+const BoxPrimitive = styled('div', {
+  color: 'red',
+  allowedCssProps: ['color'],
+})
+
+const BoxPrimitive2 = styled(Primitive.div, {
+  color: 'blue',
+})
+
+export const App = (): JSX.Element => {
+  const ref = useRef<HTMLDivElement>(null)
+  console.log('Box ref:', ref)
+
   return (
-    <div className={center({ h: 'full' })}>
-      <div
-        className={css(
-          {
-            textStyle: '4xl',
-            display: 'flex',
-            flexDirection: 'column',
-            color: 'green.300',
-            textAlign: 'center',
-            fontWeight: 'semibold',
+    <>
+      <Box
+        // @ts-expect-error
+        style={{ color: 'red' }}
+        css={{
+          background: '$background-primary-prominent',
+          '&:hover': {
+            '&:is(div)': {
+              '&:not(:empty)': {
+                background: '$yellow-500',
+              },
+            },
           },
-          {
-            color: 'red.500',
-            bg: 'yellow.200',
-          },
-          overrides,
-        )}
+        }}
       >
-        <Stack fontSize="2xl">
-          <styled.div border="2px solid token(colors.red.300)">🐼</styled.div>
-          <span>Hello from Panda</span>
-        </Stack>
+        Box
+      </Box>
+
+      <ExtendedBox>ExtendedBox</ExtendedBox>
+      <ExtendedBox2>ExtendedBox2</ExtendedBox2>
+      <Variants ref={ref}>Variant default</Variants>
+      <Variants ghost propInForwardRef>
+        Variant with props
+      </Variants>
+      <Box
+        css={[
+          css({
+            background: '$green-600',
+            padding: 10, // wont be applied
+          }),
+        ]}
+      >
+        css prop
+      </Box>
+      <div
+        className={cssStyles.className({
+          status: 'ok',
+          ghost: true,
+        })}
+      >
+        css.className()
       </div>
-      <div className={button({ size: 'lg', visual: 'funky' })}>Button</div>
-      <div className={atomicRecipe({ visual: 'solid', size: 'sm' })}>Atomic Button</div>
-    </div>
+      <BoxCVA fail>Box with cva()</BoxCVA>
+
+      {/* force some classes to test asChild edge cases */}
+      {/* @ts-expect-error */}
+      <BoxPrimitive className="primitive1" asChild>
+        {/* @ts-expect-error */}
+        <BoxPrimitive2 className="p-9999px primitive2" asChild>
+          {/* @ts-expect-error */}
+          <Box ghost className="m-50px box">
+            Box asChild
+          </Box>
+        </BoxPrimitive2>
+      </BoxPrimitive>
+    </>
   )
 }

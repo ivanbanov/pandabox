@@ -2,7 +2,8 @@
   "name": "unplugin-playground",
   "private": true,
   "scripts": {
-    "dev": "nodemon -w '../src/**/*.ts' -e .ts -x vite"
+    "dev": "nodemon -w '../src/**/*.ts' -e .ts -x vite",
+    "build": "vite build"
   },
   "devDependencies": {
     "@pandacss/dev": "^0.36.1",

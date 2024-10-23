@@ -19,6 +19,8 @@ export function inlineCva(base, defaultVariants, variantStyles, variants) {
   const classList = [base]
   const variantProps = { ...defaultVariants, ...variants }
 
+  console.log(variantProps)
+
   for (const [key, value] of Object.entries(variantProps)) {
     if (variantStyles[key][value]) {
       classList.push(variantStyles[key][value])

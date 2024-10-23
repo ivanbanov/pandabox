@@ -8,6 +8,7 @@ export default defineConfig({
     Inspect(),
     panda({
       outfile: './panda.css',
+      optimizeJs: 'auto',
     }),
     react(),
   ],

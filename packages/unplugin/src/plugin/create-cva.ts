@@ -2,17 +2,21 @@ import { compact } from '@pandacss/shared'
 import { type RecipeConfig } from '@pandacss/types'
 import { type PandaPluginContext } from './create-context'
 
-type Cva = Pick<RecipeConfig, 'base' | 'variants' | 'compoundVariants'>
+type Cva = Pick<RecipeConfig, 'base' | 'variants' | 'compoundVariants' | 'defaultVariants'>
 
-const defaults = (conf: Cva) => ({
-  base: {},
-  variants: {},
-  defaultVariants: {},
-  compoundVariants: [],
-  ...conf,
-})
+const defaults = (conf: Cva) => {
+  const { variants = {}, defaultVariants = {}, compoundVariants = [], allowedCssProps = [], ...base } = conf
+
+  return {
+    variants,
+    defaultVariants,
+    compoundVariants,
+    base,
+  }
+}
 
 export const createCva = (config: Cva, mergeCss: PandaPluginContext['mergeCss']) => {
+  console.log(config)
   const { base, variants, defaultVariants, compoundVariants } = defaults(config)
 
   function resolve(props = {}) {
